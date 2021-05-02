@@ -77,4 +77,5 @@ class Epaper:
                     self.data(0xFF)
         else:
             for i in range(int((self.x * self.y) / 8)):
-                self.data(buf[i])
+                # black is 0-on/1-off
+                self.data(~buf[i])

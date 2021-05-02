@@ -11,7 +11,7 @@ from vac_quote import get_vac_quote
 from incidences import get_7days_incidence
 
 def to_bytes(image):
-    data = [0 for i  in range(width * height // 8)]
+    data = [0 for i in range(width * height // 8)]
     for i, byte in enumerate(ImageOps.mirror(image).getdata()):
         if 0xff == byte:
             data[i // 8]  |= (1 << (i % 8))
