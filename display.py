@@ -17,6 +17,27 @@ def to_bytes(image):
     data.reverse()
     return data
 
+class Diagram:
+    _points = []
+
+    def __init__(self, width, height, position):
+        self._width = width
+        self._height = height
+        self._offset = (position[0] - width, position[1] - height)
+
+    def add_point(self, point):
+        new_point = (point[0] + self._offset[0], point[1] + self._offset[1])
+        self._points.append(new_point)
+
+    def draw(self):
+        upper_end = (self._offset[0], self._offset[1] + self._height)
+        right_end = (self._offset[0] + self._width, self._offset[1])
+        draw_black.line(upper_end, self._offset, right_end)
+        
+        draw_red.point(self._points)
+
+    
+
 height = 250
 width = 128
 
@@ -46,7 +67,7 @@ inner_padd_v = 5
 inner_padd_h = 10
 upper_border = padding - inner_padd_v
 # now inner padding for lower border looks better.
-lower_border = padding + h1 * 2 +inner_padd_v
+lower_border = padding + h1 * 2 + inner_padd_v
 
 left_border = (width - w) / 2 - inner_padd_h
 right_border = (width + w) / 2 + inner_padd_h
@@ -86,7 +107,7 @@ if 'raspberrypi' == os.uname().nodename:
     print('flashing ...', end='')
     e = Epaper(height,width)
     e.flash_red(buf=to_bytes(im_red))
-    e.flash_black(on=False)
+    e.flash_black(buf=to_bytes(im_black))
     e.update()
 
     time.sleep(1)
