@@ -14,6 +14,6 @@ def get_7days_incidence():
         f.write(response.content)
 
     dataframe = pandas.read_csv(inc_path)
-    print([sum(dataframe.neu_erkrankte[i-6:i+1])/1.11434 for i in range(6, len(dataframe.zeit))])
+    return [sum(dataframe.neu_erkrankte[i-7:i])/1.11434 for i in range(7, len(dataframe.zeit) + 1)]
 
 
