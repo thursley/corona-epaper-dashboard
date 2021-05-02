@@ -8,6 +8,7 @@ from PIL import ImageFont
 from PIL import ImageOps
 
 from vac_quote import get_vac_quote
+from incidences import get_7days_incidence
 
 def to_bytes(image):
     data = [0 for i  in range(width * height // 8)]
@@ -30,12 +31,28 @@ class Diagram:
         new_point = (point[0] + self._offset[0], self._offset[1] - point[1])
         self._points.append(new_point)
 
+    def set_title(self, title):
+        self._title = title
+
+    def plot(self, values):
+        bucket_size = len(values) // self._width  +1
+        buckets = [values[i-bucket_size:i] for i in range(bucket_size, len(values)+1, bucket_size)]
+        mean_values = [np.mean(bucket) for bucket in buckets]
+        height_factor = self._height / max(mean_values)
+
+        for i, value in enumerate(mean_values):
+            self.add_point((i, int(value * height_factor)))
+
+
     def draw(self):
         upper_end = (self._offset[0], self._offset[1] - self._height)
         right_end = (self._offset[0] + self._width, self._offset[1])
         draw_red.line([upper_end, self._offset, right_end], width=2, fill=0)
-        print(upper_end)
-        draw_red.point(self._points)
+        # draw_red.point(self._points)
+        draw_red.line(self._points)
+
+        if self._title is not None:
+            draw_red.text(self._offset, self._title, font=font_caption)
 
     
 
@@ -102,16 +119,14 @@ draw_red.line(lower_caption_line, width = 2, fill =0xff)
 draw_red.text(((width - w_c1) / 2, upper_border - h_c1 / 2), upper_caption, font=font_caption)
 draw_red.text(((width - w_c2) / 2, lower_border - h_c2 / 2), lower_caption, font=font_caption)
 
-diag = Diagram(width - 40, 60, (20, 80))
-diag.add_point((3,5))
-diag.add_point((4,6))
-diag.add_point((5,4))
-diag.add_point((6,2))
-diag.add_point((7,7))
-diag.add_point((8,2))
-diag.add_point((9,1))
-diag.add_point((10,8))
+diag_width = width - 20
+diag_height = 60
 
+incidences = get_7days_incidence()
+
+diag = Diagram(diag_width, diag_height, (10, 80))
+diag.plot(incidences)
+diag.set_title(f'akt. Inzidenz: {round(incidences[-1], 1)}')
 diag.draw()
 
 if 'raspberrypi' == os.uname().nodename: 
