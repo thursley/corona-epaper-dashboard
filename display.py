@@ -30,8 +30,8 @@ draw_black = ImageDraw.Draw(im_black)
 original_fontsize = 10
 font_factor = 2
 
-font = ImageFont.truetype('/home/hen/Downloads/Minecraftia-Regular.ttf', original_fontsize * font_factor)
-font_caption = ImageFont.truetype('/home/hen/Downloads/Minecraftia-Regular.ttf', original_fontsize)
+font = ImageFont.truetype('./fonts/Minecraftia-Regular.ttf', original_fontsize * font_factor)
+font_caption = ImageFont.truetype('./fonts/Minecraftia-Regular.ttf', original_fontsize)
 
 
 message1 = f"{(get_vac_quote('th') * 100).round(2)}"
