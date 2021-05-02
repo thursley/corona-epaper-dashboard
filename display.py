@@ -30,8 +30,8 @@ draw_black = ImageDraw.Draw(im_black)
 original_fontsize = 10
 font_factor = 2
 
-font = ImageFont.truetype('./fonts/Minecraftia-Regular.ttf', original_fontsize * font_factor)
-font_caption = ImageFont.truetype('./fonts/Minecraftia-Regular.ttf', original_fontsize)
+font = ImageFont.truetype('./fonts/DejaVuSans.ttf', original_fontsize * font_factor)
+font_caption = ImageFont.truetype('./fonts/DejaVuSans.ttf', original_fontsize)
 
 
 message1 = f"{(get_vac_quote('th') * 100).round(2)}"
@@ -46,7 +46,7 @@ inner_padd_v = 5
 inner_padd_h = 10
 upper_border = padding - inner_padd_v
 # now inner padding for lower border looks better.
-lower_border = padding + h1 * 2 
+lower_border = padding + h1 * 2 +inner_padd_v
 
 left_border = (width - w) / 2 - inner_padd_h
 right_border = (width + w) / 2 + inner_padd_h
@@ -59,12 +59,12 @@ lower_right = (right_border, lower_border)
 upper_caption = 'th'
 
 w_c1, h_c1 = draw_red.textsize(upper_caption,font=font_caption)
-upper_caption_line = (((width - w_c1) / 2 - inner_padd_h, upper_border), ((width + w_c1) / 2 + inner_padd_h, upper_border))
+upper_caption_line = (((width - w_c1) / 2 - inner_padd_v, upper_border), ((width + w_c1) / 2 + inner_padd_v, upper_border))
 
 lower_caption = 'brd'
 
 w_c2, h_c2 = draw_red.textsize(lower_caption,font=font_caption)
-lower_caption_line = (((width - w_c2) / 2 - inner_padd_h, lower_border - 1), ((width + w_c2) / 2 + inner_padd_h, lower_border - 1))
+lower_caption_line = (((width - w_c2) / 2 - inner_padd_v, lower_border - 1), ((width + w_c2) / 2 + inner_padd_v, lower_border - 1))
 
 
 draw_red.text(((width - w1) / 2, padding), message1, font = font, fill = 0x0)
@@ -77,8 +77,8 @@ draw_red.line([upper_left, upper_right, lower_right, lower_left, upper_left],wid
 draw_red.line(upper_caption_line, width = 2, fill =0xff)
 draw_red.line(lower_caption_line, width = 2, fill =0xff)
 
-draw_red.text(((width - w_c1) / 2, upper_border - h_c1 / 4), upper_caption, font=font_caption)
-draw_red.text(((width - w_c2) / 2, lower_border - h_c2 / 3), lower_caption, font=font_caption)
+draw_red.text(((width - w_c1) / 2, upper_border - h_c1 / 2), upper_caption, font=font_caption)
+draw_red.text(((width - w_c2) / 2, lower_border - h_c2 / 2), lower_caption, font=font_caption)
 
 if 'raspberrypi' == os.uname().nodename: 
     from Epaper import Epaper
