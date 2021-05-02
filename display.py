@@ -78,7 +78,7 @@ draw_red.line(upper_caption_line, width = 2, fill =0xff)
 draw_red.line(lower_caption_line, width = 2, fill =0xff)
 
 draw_red.text(((width - w_c1) / 2, upper_border - h_c1 / 4), upper_caption, font=font_caption)
-draw_red.text(( 0 / 2, lower_border - h_c2 / 3), lower_caption, font=font_caption)
+draw_red.text(((width - w_c2) / 2, lower_border - h_c2 / 3), lower_caption, font=font_caption)
 
 if 'raspberrypi' == os.uname().nodename: 
     from Epaper import Epaper
@@ -92,9 +92,5 @@ if 'raspberrypi' == os.uname().nodename:
     time.sleep(1)
     print(' done.')
 else:
-    for i, byte in enumerate(im_red.getdata()):
-        if byte != 0xff: 
-            print(i)
-            break
     # we are not running on pi, just show image.
     im_red.show()
