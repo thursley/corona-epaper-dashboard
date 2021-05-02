@@ -25,7 +25,6 @@ class Diagram:
         self._width = width
         self._height = height
         self._offset = (position[0], position[1] + height)
-        print(self._offset)
 
     def add_point(self, point):
         new_point = (point[0] + self._offset[0], self._offset[1] - point[1])
