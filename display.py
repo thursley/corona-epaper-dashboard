@@ -23,17 +23,18 @@ class Diagram:
     def __init__(self, width, height, position):
         self._width = width
         self._height = height
-        self._offset = (position[0] - width, position[1] - height)
+        self._offset = (position[0], position[1] + height)
+        print(self._offset)
 
     def add_point(self, point):
-        new_point = (point[0] + self._offset[0], point[1] + self._offset[1])
+        new_point = (point[0] + self._offset[0], self._offset[1] - point[1])
         self._points.append(new_point)
 
     def draw(self):
-        upper_end = (self._offset[0], self._offset[1] + self._height)
+        upper_end = (self._offset[0], self._offset[1] - self._height)
         right_end = (self._offset[0] + self._width, self._offset[1])
-        draw_black.line(upper_end, self._offset, right_end)
-        
+        draw_red.line([upper_end, self._offset, right_end], width=2, fill=0)
+        print(upper_end)
         draw_red.point(self._points)
 
     
@@ -100,6 +101,18 @@ draw_red.line(lower_caption_line, width = 2, fill =0xff)
 
 draw_red.text(((width - w_c1) / 2, upper_border - h_c1 / 2), upper_caption, font=font_caption)
 draw_red.text(((width - w_c2) / 2, lower_border - h_c2 / 2), lower_caption, font=font_caption)
+
+diag = Diagram(width - 40, 60, (20, 80))
+diag.add_point((3,5))
+diag.add_point((4,6))
+diag.add_point((5,4))
+diag.add_point((6,2))
+diag.add_point((7,7))
+diag.add_point((8,2))
+diag.add_point((9,1))
+diag.add_point((10,8))
+
+diag.draw()
 
 if 'raspberrypi' == os.uname().nodename: 
     from Epaper import Epaper
