@@ -13,7 +13,7 @@ from incidences import get_7days_incidence
 def to_bytes(image):
     data = [0 for i  in range(width * height // 8)]
     for i, byte in enumerate(ImageOps.mirror(image).getdata()):
-        if 0xff != byte:
+        if 0xff == byte:
             data[i // 8]  |= (1 << (i % 8))
     data.reverse()
     return data
@@ -46,25 +46,26 @@ class Diagram:
     def draw(self):
         upper_end = (self._offset[0], self._offset[1] - self._height)
         right_end = (self._offset[0] + self._width, self._offset[1])
-        draw_red.line([upper_end, self._offset, right_end], width=2, fill=0)
+        draw_black.line([upper_end, self._offset, right_end], width=2, fill=0xff)
         # draw_red.point(self._points)
-        draw_red.line(self._points)
+        draw_red.line(self._points, fill=0xff)
 
         if self._title is not None:
-            draw_red.text(self._offset, self._title, font=font_caption)
+            draw_black.text(self._offset, self._title, font=font_caption, fill=0xff)
 
     
 
 height = 250
 width = 128
 
-im_black = Image.new('1', (width, height), 255)
-im_red = Image.new('1', (width, height), 255)
+im_black = Image.new('1', (width, height), 0)
+im_red = Image.new('1', (width, height), 0)
 
-padding = 15
 
 draw_red = ImageDraw.Draw(im_red)
 draw_black = ImageDraw.Draw(im_black)
+
+padding = 15
 original_fontsize = 10
 font_factor = 2
 
@@ -105,18 +106,18 @@ w_c2, h_c2 = draw_red.textsize(lower_caption,font=font_caption)
 lower_caption_line = (((width - w_c2) / 2 - inner_padd_v, lower_border - 1), ((width + w_c2) / 2 + inner_padd_v, lower_border - 1))
 
 
-draw_red.text(((width - w1) / 2, padding), message1, font = font, fill = 0x0)
+draw_red.text(((width - w1) / 2, padding), message1, font = font, fill=0xff)
 w,h = draw_red.textsize(message2, font=font)
 
-draw_red.text(((width - w2) / 2, padding + h), message2, font = font, fill = 0x0)
+draw_red.text(((width - w2) / 2, padding + h), message2, font = font, fill=0xff)
 
-draw_red.line([upper_left, upper_right, lower_right, lower_left, upper_left],width=2, fill=0x0)
+draw_black.line([upper_left, upper_right, lower_right, lower_left, upper_left],width=2, fill=0xff)
 
-draw_red.line(upper_caption_line, width = 2, fill =0xff)
-draw_red.line(lower_caption_line, width = 2, fill =0xff)
+draw_black.line(upper_caption_line, width = 2, fill =0)
+draw_black.line(lower_caption_line, width = 2, fill =0)
 
-draw_red.text(((width - w_c1) / 2, upper_border - h_c1 / 2), upper_caption, font=font_caption)
-draw_red.text(((width - w_c2) / 2, lower_border - h_c2 / 2), lower_caption, font=font_caption)
+draw_red.text(((width - w_c1) / 2, upper_border - h_c1 / 2), upper_caption, font=font_caption, fill=0xff)
+draw_red.text(((width - w_c2) / 2, lower_border - h_c2 / 2), lower_caption, font=font_caption, fill=0xff)
 
 diag_width = width - 20
 diag_height = 60
@@ -132,7 +133,7 @@ if 'raspberrypi' == os.uname().nodename:
     from Epaper import Epaper
 
     print('flashing ...', end='')
-    e = Epaper(height,width)
+    e = Epaper(height, width)
     e.flash_red(buf=to_bytes(im_red))
     e.flash_black(buf=to_bytes(im_black))
     e.update()
@@ -141,4 +142,17 @@ if 'raspberrypi' == os.uname().nodename:
     print(' done.')
 else:
     # we are not running on pi, just show image.
-    im_red.show()
+    imb = im_black.load()
+    imr = im_red.load()
+    arr = np.zeros(shape=(250,128,3), dtype=np.uint8)
+    for x in range(width):
+        for y in range(height):
+            if imb[x,y] == 0xff:
+                arr[y, x] = (0,0,0)
+            elif imr[x,y] == 0xff:
+                arr[y, x] = (0xff,0,0)
+            else:
+                arr[y, x] = (0xff,0xff,0xff)
+
+    im = Image.fromarray(arr)
+    im.show()
