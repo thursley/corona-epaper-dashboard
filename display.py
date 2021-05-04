@@ -10,6 +10,7 @@ from PIL import ImageOps
 from vac_quote import get_vac_quote
 from incidences import get_7days_incidence
 
+
 def to_bytes(image):
     data = [0 for i in range(width * height // 8)]
     for i, byte in enumerate(ImageOps.mirror(image).getdata()):
@@ -51,16 +52,74 @@ class Diagram:
         draw_red.line(self._points, fill=0xff)
 
         if self._title is not None:
-            draw_black.text(self._offset, self._title, font=font_caption, fill=0xff)
+            draw_black.text(self._offset, self._title, font=caption_font, fill=0xff)
 
-    
+class DoubleValue:
+
+    _padding = 5
+    _padding_small = 2
+
+    def __init__(self, width, position):
+        self._width = width
+        self._position = position
+        self._height = draw_red.textsize(" ", font)[1] * 2 + self._padding * 2
+
+    def set_upper_value(self, text, title=None):
+        self._upper_value = text
+        self._upper_title = title
+
+    def set_lower_value(self, text, title=None):
+        self._lower_value = text
+        self._lower_title = title
+
+    def draw(self):
+        self._draw_frame()
+        self._draw_values()
+        self._draw_titles()
+
+    def _draw_frame(self):
+        upper_left = (self._position[0], self._position[1])
+        upper_right = (self._position[0] + self._width, self._position[1])
+        lower_left = (self._position[0], self._position[1] + self._height)
+        lower_right = (self._position[0] + self._width, self._position[1] + self._height)
+
+        draw_black.line((upper_left, upper_right, lower_right, lower_left, upper_left), width=2, fill=0xff)
+
+    def _draw_values(self):
+        w, h = draw_red.textsize(self._upper_value, font=font)
+        pos = (self._position[0] + (self._width - w) / 2, self._position[1] + self._padding)
+        draw_red.text(pos, self._upper_value, font=font, fill=0xff)
+       
+        w, _ = draw_red.textsize(self._lower_value, font=font)
+        pos = (self._position[0] + (self._width - w) / 2, self._position[1] + h + self._padding)
+        draw_red.text(pos, self._lower_value, font=font, fill=0xff)
+
+    def _draw_titles(self):
+        if self._upper_title is not None:
+            w, h = draw_black.textsize(self._upper_title, font=caption_font)
+            left = self._position[0] + (self._width - w) / 2 - self._padding
+            right = self._position[0] +  (self._width + w) / 2 + self._padding
+            line = (left, self._position[1]), (right, self._position[1])
+            draw_black.line(line, width=2, fill=0)
+            
+            pos = (self._position[0] + (self._width - w) / 2, self._position[1] - h / 2)
+            draw_red.text(pos, self._upper_title, font=caption_font, fill=0xff)
+
+        if self._lower_title is not None:
+            w, h = draw_black.textsize(self._lower_title, font=caption_font)
+            height = self._position[1] + self._height - 1
+            left  = self._position[0] + (self._width - w) / 2 - self._padding
+            right = self._position[0] + (self._width + w) / 2 + self._padding
+            line = (left, height), (right, height)
+            draw_black.line(line, width=2, fill=0)
+            pos = (self._position[0] + (self._width - w) / 2, height - h / 2)
+            draw_red.text(pos, self._lower_title, font=caption_font, fill=0xff)
 
 height = 250
 width = 128
 
 im_black = Image.new('1', (width, height), 0)
 im_red = Image.new('1', (width, height), 0)
-
 
 draw_red = ImageDraw.Draw(im_red)
 draw_black = ImageDraw.Draw(im_black)
@@ -70,64 +129,27 @@ original_fontsize = 10
 font_factor = 2
 
 font = ImageFont.truetype('./fonts/DejaVuSans.ttf', original_fontsize * font_factor)
-font_caption = ImageFont.truetype('./fonts/DejaVuSans.ttf', original_fontsize)
+caption_font = ImageFont.truetype('./fonts/DejaVuSans.ttf', original_fontsize)
 
+inc_th = f"{(get_vac_quote('th') * 100).round(2)}"
+inc_de = f"{(get_vac_quote('brd') * 100).round(2)}"
 
-message1 = f"{(get_vac_quote('th') * 100).round(2)}"
-message2 = f"{(get_vac_quote('brd') * 100).round(2)}"
-
-w1, h1 = draw_red.textsize(message1, font=font)
-w2, h2 = draw_red.textsize(message2, font=font)
-
-w = max(w1, w2)
-
-inner_padd_v = 5
-inner_padd_h = 10
-upper_border = padding - inner_padd_v
-# now inner padding for lower border looks better.
-lower_border = padding + h1 * 2 + inner_padd_v
-
-left_border = (width - w) / 2 - inner_padd_h
-right_border = (width + w) / 2 + inner_padd_h
-
-upper_left = (left_border, upper_border)
-upper_right = (right_border, upper_border)
-lower_left = (left_border, lower_border)
-lower_right = (right_border, lower_border)
-
-upper_caption = 'th'
-
-w_c1, h_c1 = draw_red.textsize(upper_caption,font=font_caption)
-upper_caption_line = (((width - w_c1) / 2 - inner_padd_v, upper_border), ((width + w_c1) / 2 + inner_padd_v, upper_border))
-
-lower_caption = 'brd'
-
-w_c2, h_c2 = draw_red.textsize(lower_caption,font=font_caption)
-lower_caption_line = (((width - w_c2) / 2 - inner_padd_v, lower_border - 1), ((width + w_c2) / 2 + inner_padd_v, lower_border - 1))
-
-
-draw_red.text(((width - w1) / 2, padding), message1, font = font, fill=0xff)
-w,h = draw_red.textsize(message2, font=font)
-
-draw_red.text(((width - w2) / 2, padding + h), message2, font = font, fill=0xff)
-
-draw_black.line([upper_left, upper_right, lower_right, lower_left, upper_left],width=2, fill=0xff)
-
-draw_black.line(upper_caption_line, width = 2, fill =0)
-draw_black.line(lower_caption_line, width = 2, fill =0)
-
-draw_red.text(((width - w_c1) / 2, upper_border - h_c1 / 2), upper_caption, font=font_caption, fill=0xff)
-draw_red.text(((width - w_c2) / 2, lower_border - h_c2 / 2), lower_caption, font=font_caption, fill=0xff)
-
-diag_width = width - 20
+diag_width = width - 2 * padding
 diag_height = 60
 
 incidences = get_7days_incidence()
 
-diag = Diagram(diag_width, diag_height, (10, 80))
+diag = Diagram(diag_width, diag_height, (padding, 80))
 diag.plot(incidences)
 diag.set_title(f'akt. Inzidenz: {round(incidences[-1], 1)}')
 diag.draw()
+
+dv = DoubleValue(width - 2 * padding, (padding, 12))
+dv.set_upper_value(inc_th, "th")
+dv.set_lower_value(inc_de, "de")
+dv.draw()
+
+
 
 if 'raspberrypi' == os.uname().nodename: 
     from Epaper import Epaper
