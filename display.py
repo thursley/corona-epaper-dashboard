@@ -11,7 +11,7 @@ from datetime import datetime
 
 from vac_quote import get_vac_quote
 from incidences import get_7days_incidence
-
+from weather import get_temperature
 
 def to_bytes(image):
     data = [0 for i in range(width * height // 8)]
@@ -120,6 +120,7 @@ class DoubleValue:
 height = 250
 width = 128
 
+print('preparing image... ', end='')
 im_black = Image.new('1', (width, height), 0)
 im_red = Image.new('1', (width, height), 0)
 
@@ -129,17 +130,24 @@ draw_black = ImageDraw.Draw(im_black)
 padding = 15
 original_fontsize = 10
 font_factor = 2
+big_font_factor = 2.5
 
 font = ImageFont.truetype('./fonts/DejaVuSans.ttf', original_fontsize * font_factor)
+big_font = ImageFont.truetype('./fonts/DejaVuSans.ttf', int(original_fontsize * big_font_factor))
 caption_font = ImageFont.truetype('./fonts/DejaVuSans.ttf', original_fontsize)
+print('done.')
 
+print('getting vaccination quotes... ', end='')
 inc_th = f"{(get_vac_quote('th') * 100).round(2)}"
 inc_de = f"{(get_vac_quote('brd') * 100).round(2)}"
+print('done.')
 
 diag_width = width - 2 * padding
 diag_height = 60
 
+print('getting incidences... ', end='')
 incidences = get_7days_incidence()
+print('done.')
 
 diag = Diagram(diag_width, diag_height, (padding, 80))
 diag.plot(incidences)
@@ -159,6 +167,16 @@ _, h = draw_black.textsize(timestamp_date, font=caption_font)
 w, _ = draw_black.textsize(timestamp_time, font=caption_font)
 draw_black.text((padding, height - h), timestamp_date, font=caption_font, fill=0xff)
 draw_black.text((width - padding - w, height- h), timestamp_time, font=caption_font, fill=0xff)
+
+print('getting weather data... ', end='')
+temperature = f'{get_temperature()}°C'
+print('done.')
+
+temp_height = 80 + diag_height + 40
+
+w, _ = draw_red.textsize(temperature, font=big_font)
+draw_red.text(((width - w) / 2, temp_height), temperature, font=big_font, fill=0xff)
+
 
 if 'raspberrypi' == os.uname().nodename: 
     from Epaper import Epaper
