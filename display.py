@@ -7,6 +7,8 @@ from PIL import ImageDraw
 from PIL import ImageFont
 from PIL import ImageOps
 
+from datetime import datetime
+
 from vac_quote import get_vac_quote
 from incidences import get_7days_incidence
 
@@ -149,7 +151,14 @@ dv.set_upper_value(inc_th, "th")
 dv.set_lower_value(inc_de, "de")
 dv.draw()
 
+now = datetime.now()
+timestamp_date = now.strftime("%d.%m.%Y")
+timestamp_time = now.strftime("%H:%M")
 
+_, h = draw_black.textsize(timestamp_date, font=caption_font)
+w, _ = draw_black.textsize(timestamp_time, font=caption_font)
+draw_black.text((padding, height - h), timestamp_date, font=caption_font, fill=0xff)
+draw_black.text((width - padding - w, height- h), timestamp_time, font=caption_font, fill=0xff)
 
 if 'raspberrypi' == os.uname().nodename: 
     from Epaper import Epaper
