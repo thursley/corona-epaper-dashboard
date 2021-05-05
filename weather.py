@@ -13,10 +13,17 @@ if not rsp.ok:
     exit(1)
 
 data = json.loads(rsp.content)
+print(data)
 
 def get_temperature():
     temperature_c = round(data['main']['temp'] + kelvin_offset, 1)
     return temperature_c
+
+def get_icon_name():
+    try:
+        return data['weather'][0]['icon']
+    except:
+        return 'alien'
 
 if __name__ == '__main__':
     print(f'{get_temperature()} °C')

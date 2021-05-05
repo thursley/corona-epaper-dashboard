@@ -12,11 +12,12 @@ from datetime import datetime
 from vac_quote import get_vac_quote
 from incidences import get_7days_incidence
 from weather import get_temperature
+from weather import get_icon_name
 
 def to_bytes(image):
     data = [0 for i in range(width * height // 8)]
     for i, byte in enumerate(ImageOps.mirror(image).getdata()):
-        if 0xff == byte:
+        if 0 != byte:
             data[i // 8]  |= (1 << (i % 8))
     data.reverse()
     return data
@@ -170,13 +171,21 @@ draw_black.text((width - padding - w, height- h), timestamp_time, font=caption_f
 
 print('getting weather data... ', end='')
 temperature = f'{get_temperature()}°C'
+weather_icon = f'weather-icons/{get_icon_name()}.png'
 print('done.')
 
-temp_height = 80 + diag_height + 40
 
-w, _ = draw_red.textsize(temperature, font=big_font)
-draw_red.text(((width - w) / 2, temp_height), temperature, font=big_font, fill=0xff)
+icon_height = 80 + diag_height + 10
+temp_height = icon_height + 60
 
+
+
+icon = ImageOps.invert(Image.open(weather_icon))
+w, _ = icon.size
+im_black.paste(icon, (int((width -w ) / 2), icon_height))
+
+w, _ = draw_black.textsize(temperature, font=font)
+draw_black.text(((width - w) / 2, temp_height), temperature, font=font, fill=0xff)
 
 if 'raspberrypi' == os.uname().nodename: 
     from Epaper import Epaper
