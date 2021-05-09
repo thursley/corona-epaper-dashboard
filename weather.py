@@ -9,15 +9,17 @@ city = 'Jena'
 
 rsp = requests.get(f'https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}')
 if not rsp.ok:
-    print(f'could not retrieve weather data for {city}. abort.')
-    exit(1)
-
-data = json.loads(rsp.content)
-print(data)
+    print(f'warning: could not retrieve weather data for {city}.')
+    data = None
+else:
+    data = json.loads(rsp.content)
 
 def get_temperature():
-    temperature_c = round(data['main']['temp'] + kelvin_offset, 1)
-    return temperature_c
+    if None == data:
+        return -99.0
+    else:
+        temperature_c = round(data['main']['temp'] + kelvin_offset, 1)
+        return temperature_c
 
 def get_icon_name():
     try:
