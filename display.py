@@ -176,9 +176,7 @@ print('done.')
 
 
 icon_height = 80 + diag_height + 10
-temp_height = icon_height + 60
-
-
+temp_height = icon_height + 67
 
 icon = ImageOps.invert(Image.open(weather_icon))
 w, _ = icon.size
